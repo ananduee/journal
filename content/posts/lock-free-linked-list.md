@@ -83,9 +83,11 @@ As per wikipedia "CAS compares the contents of a memory location with a given in
 1. expected value at the memory location
 1. new value to set at memory location
 
+Also this function will return a boolean value which will be ```true``` in case value was set to new value and ```false``` in case value at memory location had already changed so set did not happen.
+
 Most of modern CPU's support this operation by default i.e. In 1 operation you can compare value in a memory location and if found equal change it to a new value.
 
-Java provides this through "AtomicInteger", "AtomicBoolean", "AtomicLong" etc classes. If you look at "compareAndSet" method inside "AtomicInteger" it is calling "Unsafe" class of java to hardware specific operation.
+C++ provides this operation through ```std::atomic_compare_exchange_strong``` and Java provides this through "AtomicInteger", "AtomicBoolean", "AtomicLong" etc classes. If you look at "compareAndSet" method inside "AtomicInteger" it is calling "Unsafe" class of java to perform hardware specific operation.
 
 Here is how out programme would look with compare and swap operation
 
@@ -114,6 +116,7 @@ class CASTesting
 
     private static int increment() {
         int currentValue = value.intValue();
+        // We need to keep doing this till compare and set is successful
         while (!value.compareAndSet(currentValue, currentValue + 1)) {
             currentValue = value.intValue();
         }
