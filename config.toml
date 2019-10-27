@@ -1,4 +1,12 @@
 baseURL = "https://ananduee.github.io/"
 languageCode = "en-us"
 title = "Bad with names"
-theme = "hugo-theme-cactus-plus"
+theme = "xmin"
+pygmentsCodefences = true
+pygmentsStyle = "tango"
+customCodeStyle = true
+
+[[menu.main]]
+    name = "Home"
+    url = "/"
+    weight = 1
