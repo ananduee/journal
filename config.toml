@@ -1,6 +1,6 @@
 baseURL = "https://ananduee.github.io/"
 languageCode = "en-us"
-title = "Bad with names"
+title = "Keep it simple, but not simpler"
 theme = "xmin"
 pygmentsCodefences = true
 pygmentsStyle = "tango"
