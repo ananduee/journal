@@ -12,7 +12,7 @@ On of my personal favuorite paradigms in programming is asynchronous programming
 
 Let's say we have some data which others can be read as well as change. Depending on the methods we provide to change the data we might leave data in in-consistent state. for example :-
 
-Let's say we have a variable ```int value = 0``` and we provide a method to increment this value. Here is how basic implementation of "increment" method would look :-
+Let's say we have a variable ```int value = 0``` and we provide a method to increment this value. Here is how code of "increment" method would look :-
 
 ```java
 void increment() {
@@ -20,7 +20,7 @@ void increment() {
 }
 ```
 
-Till time this method gets called from one thread everything will work fine. Now lets say multiple threads start calling this method increment in parallel. Here is java code to do so :-
+Till time we call this method from one thread or one by one everything will be fine. Now lets say multiple threads start calling this method parallely. Here is java code for the same here we are calling "increment" method 10000 times. We are only using 2 threads so roughly each thread will call increment 5000 times.
 
 ```java
 import java.util.concurrent.CompletableFuture;
@@ -54,7 +54,7 @@ class IncrementTesting
 }
 ```
 
-We would expect this programm to print "10000", However here is output of this programme on my laptop :-
+On running this code e would expect this programm to print "10000", However here is output of this programme on my laptop :-
 
 1. Run number 1 - 9994
 1. Run number 2 - 9992
@@ -67,21 +67,27 @@ In fact every run will give you a different output in some runs you can even get
 1. Increase the value by one
 1. Set this value to existing variable.
 
-If multiple threads are performing this action in parallel it might happen that a thread 1 (T1) has read the value and wants to increase it now another thread T2 reads this value before T1 fnishes setting the value in such cases value won't be incremneted in T2 as it has previous value.
+If multiple threads are performing this action in parallel it might happen that a thread 1 (T1) has read the value and wants to increase it now another thread T2 reads this value before T1 fnishes setting the value in such cases value won't be increased in T2 as it has previous value.
 
 Traditional way to solve this problem is by using locks. In java we can just make the method "increment" [synchronized](https://docs.oracle.com/javase/tutorial/essential/concurrency/locksync.html). This will ensure this method can only be called by one thread at a time. If multiple threads want to invoke this method they will automatically wait for this method to finish for active thread.
 
-However locks/synchronization have a cost. In the above example second thread will always have to wait for first thread to finish this effectively means that their is not advantage of using multiple threads. 
+However locks/synchronization have a cost. In the above example second thread will always have to wait for first thread to finish, this effectively means that their is no advantage of using multiple threads as at all times their is only 1 method doing the work.
 
 So general idea of lock free programming is - Minimize usage of locks by using [optimistic design](https://en.wikipedia.org/wiki/Optimistic_concurrency_control), [CAS](https://en.wikipedia.org/wiki/Compare-and-swap) etc. We can never eliminate locks fully as lock free programming poses certain limitations on how a programme can be written.
 
 ### Compare and swap (CAS)
 
-As per wikipedia "CAS compares the contents of a memory location with a given value and, only if they are the same, modifies the contents of that memory location to a new given value.". Most of modern CPU's support this operation by default i.e. In 1 operation you can compare value in a memory location and if found equal change it to a new value.
+As per wikipedia "CAS compares the contents of a memory location with a given input value and if input value is same as current value it modifies the contents of that memory location to a new given value.". So CAS can be imagined as function taking 3 arguments.
+
+1. memory location
+1. expected value at the memory location
+1. new value to set at memory location
+
+Most of modern CPU's support this operation by default i.e. In 1 operation you can compare value in a memory location and if found equal change it to a new value.
 
 Java provides this through "AtomicInteger", "AtomicBoolean", "AtomicLong" etc classes. If you look at "compareAndSet" method inside "AtomicInteger" it is calling "Unsafe" class of java to hardware specific operation.
 
-Here is how are programme would look with compare and swap operation
+Here is how out programme would look with compare and swap operation
 
 ```java
 import java.util.concurrent.CompletableFuture;
@@ -89,8 +95,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/* Name of the class has to be "Main" only if the class is public. */
-class Ideone
+class CASTesting
 {
     public static AtomicInteger value = new AtomicInteger(0);
 
@@ -117,9 +122,11 @@ class Ideone
 }
 ```
 
-The only thing which has changed here is that we used "AtomicIntger" instead of primitive "int" which provides us atomic compare and set operation. We then assign value on which we want to increment in a seperate variable and loop till our desired value is set.
+No matter how many threads we use here we will always get 10,000 which is our desired value.
 
-Good thing here is that none of the threads will be blocked so their is no deadlock scenario to worry about.
+The only thing which has changed here is that we used "AtomicIntger" instead of primitive "int".  AtomicIntger provides us atomic compare and set operation. We then assign value on which we want to increment in a seperate variable and loop till our desired value is set.
+
+Good thing here is that none of the threads will be blocked so their is no deadlock scenario to worry about. (Deadlock is a scenario when one therad is waiting for another therad to release a lock and that lock is never released or original thread dies while lock is still acquired and does not release the lock before dying.)
 
 ### Linked list
 
